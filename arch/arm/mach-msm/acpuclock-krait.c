@@ -196,7 +196,7 @@ static void hfpll_disable(struct scalable *sc, bool skip_regulators)
 }
 
 /* Program the HFPLL rate. Assumes HFPLL is already disabled. */
-static inline void hfpll_set_rate(struct scalable *sc, const struct core_speed *tgt_s)
+static void hfpll_set_rate(struct scalable *sc, const struct core_speed *tgt_s)
 {
 	void __iomem *base = sc->hfpll_base;
 	u32 regval;
@@ -214,7 +214,7 @@ static inline void hfpll_set_rate(struct scalable *sc, const struct core_speed *
 }
 
 /* Return the L2 speed that should be applied. */
-static inline unsigned int compute_l2_level(struct scalable *sc, unsigned int vote_l)
+static unsigned int compute_l2_level(struct scalable *sc, unsigned int vote_l)
 {
 	unsigned int new_l = 0;
 	int cpu;
@@ -499,7 +499,7 @@ out:
 }
 
 /* Set the CPU's clock rate and adjust the L2 rate, voltage and BW requests. */
-static inline int acpuclk_krait_set_rate(int cpu, unsigned long rate,
+static int acpuclk_krait_set_rate(int cpu, unsigned long rate,
 				  enum setrate_reason reason)
 {
 	const struct core_speed *strt_acpu_s, *tgt_acpu_s;
