@@ -15,10 +15,15 @@ static inline unsigned long arch_local_irq_save(void)
 	unsigned long flags;
 
 	asm volatile(
-		"	mrs	%0, cpsr	@ arch_local_irq_save\n"
+ 		"	mrs	%0, " IRQMASK_REG_NAME_R "	@ arch_local_irq_save\n"
 		"	cpsid	i"
 		: "=r" (flags) : : "memory", "cc");
-	return flags;
+		"	tst	%0, %1\n"
+		"	bne	1f\n"
+		"	cpsid	i\n"
+		"1:"
+		: "=r" (flags) : "i" (IRQMASK_I_BIT) : "memory", "cc");
+ 	return flags;
 }
 
 static inline void arch_local_irq_enable(void)
@@ -38,6 +43,19 @@ static inline void arch_local_irq_disable(void)
 		:
 		: "memory", "cc");
 }
+
++/*
++ * restore saved IRQ & FIQ state
++ */
++static inline void arch_local_irq_restore(unsigned long flags)
++{
++	asm volatile(
++		"	msr	" IRQMASK_REG_NAME_W ", %0	@ local_irq_restore"
++		:
++		: "r" (flags)
++		: "memory", "cc");
++}
++
 
 #define local_fiq_enable()  __asm__("cpsie f	@ __stf" : : : "memory", "cc")
 #define local_fiq_disable() __asm__("cpsid f	@ __clf" : : : "memory", "cc")
@@ -89,6 +107,7 @@ static inline void arch_local_irq_disable(void)
 		:
 		: "memory", "cc");
 }
+
 
 /*
  * Enable FIQs
